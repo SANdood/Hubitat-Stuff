@@ -12,6 +12,11 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ * SANdood' fixes:
+ * - longer delays for complex commands so that status is returned in a timely manner
+ * - fixed lastbatt (2 trailing t's) (no longer requests battery state every refresh/poll
+ * - added log.debug/info support
+ *
  */
 
 
