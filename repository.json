@@ -1,0 +1,25 @@
+{
+  "author": "Barry A. Burke",
+  "gitHubUrl": "https://github.com/sandood",
+  "payPalUrl": "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=MJQD5NGVHYENY&currency_code=USD&source=url",
+  "packages": [
+    {
+      "name": "Ecobee Suite",
+      "category": "Integrations",
+      "location": "https://raw.githubusercontent.com/SANdood/Ecobee-Suite/master/packageManifest.json",
+      "description": "Ecobee Suite integrates Ecobee thermostats and sensors with Hubitat (and SmartThings)"
+    },
+    {
+      "name": "MeteoBridge Weather Station",
+      "category": "Integrations",
+      "location": "https://raw.githubusercontent.com/SANdood/MeteoWeather/master/packageManifest.json",
+      "description": "Weather Station using MeteoBridge/WeatherBridge via Local Connection (hubAction) for Hubitat & SmartThings"
+    },
+    {
+      "name": "PurpleAir Air Quality Station",
+      "category": "Integrations",
+      "location": "https://raw.githubusercontent.com/SANdood/PurpleAirStation/master/packageManifest.json",
+      "description": "PurpleAir Air Quality Station for SmartThings & Hubitat"
+    }
+  ]
+}
