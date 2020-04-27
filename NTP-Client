@@ -34,6 +34,7 @@
  *                               - enable corrections at 1/2 second of drift
  *                               - allow checks to be scheduled every 1/2/3/5...minutes
  *                               - randomize the seconds & minutes offset of schedule, so multiple instances(on multiple hubs) don't hit the timeserver at the same time
+ *                               - optimize calls to logger; convert remaining double math to BigDecimal
  * 
  */
 
@@ -150,7 +151,7 @@ def configure() {
 }
 
 def parse(description) {
-    logger("Executing 'parse() ${description}'", "debug")
+    if (state.loggingLevel <= 4) logger("Executing 'parse() ${description}'", "debug")
     try {
         def encrResponse = parseLanMessage(description).payload
         byte[] rawBytes = hubitat.helper.HexUtils.hexStringToByteArray(encrResponse);
@@ -164,17 +165,21 @@ def parse(description) {
         {
 			location.hub.updateSystemTime(new Date(newTimeMS.toLong()))
             if (state?.force == true)
-                logger("Force Update Hub Time to ${(new Date(newTimeMS.toLong())).toString()}", "info")
+                if (state.loggingLevel <= 4) logger("Force Update Hub Time to ${(new Date(newTimeMS.toLong())).toString()}", "info")
             else
                 logger("Update Hub Time to ${(new Date(newTimeMS.toLong())).toString()}", "info")
             sendEvent(name: "updateHubTimeTo", value: (new Date(newTimeMS.toLong())).toString())
         }
         state.force = false
         
-        logger("NTP is ${newTimeMS} ms aka ${new Date(newTimeMS.toLong())}", "info")
-        logger("Hub is ${hubTimeMS} ms aka ${new Date(hubTimeMS)}", "info")
-        logger("Diff is ${timeDiff} ms", "debug")
-        logger("minTimeDiff is ${minTimeDiff} ms", "debug")
+		if (state.loggingLevel <= 3) {
+        	logger("NTP is ${newTimeMS} ms aka ${new Date(newTimeMS.toLong())}", "info")
+        	logger("Hub is ${hubTimeMS} ms aka ${new Date(hubTimeMS)}", "info")
+		}
+		if (state.loggingLevel <= 4) {
+        	logger("Diff is ${timeDiff} ms", "debug")
+        	logger("minTimeDiff is ${minTimeDiff} ms", "debug")
+		}
         sendEvent(name: "lastNTPdate", value: (new Date(newTimeMS.toLong())).toString())
         sendEvent(name: "lastHubDate", value: (new Date(hubTimeMS)).toString())
         sendEvent(name: "lastDiffMS", value: timeDiff)
@@ -186,7 +191,7 @@ def parse(description) {
 def refresh() {
     //def SECONDS_1900_TO_EPOCH = 2208988800.0 as double
 
-    logger("Executing 'refresh()'", "debug")
+    if (state.loggingLevel <= 4) logger("Executing 'refresh()'", "debug")
     byte[] rawBytes = [0x1b, 0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
                        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
                        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
@@ -205,7 +210,7 @@ def refresh() {
 
 def force()
 {
-    logger("Executing 'force()'", "debug")
+    if (state.loggingLevel <= 4) logger("Executing 'force()'", "debug")
     state.force = true
     logger("<b>Forcing</b> Date/Time update in 2 seconds", "info")
     runIn(2, "refresh", [overwrite: true])
@@ -214,7 +219,7 @@ def force()
 
 def getTimestamp(byte[] array, int pointer)
 {
-    logger("Executing 'getTimestamp()'", "debug")
+    if (state.loggingLevel <= 4) logger("Executing 'getTimestamp()'", "debug")
     def r = 0.0 // as double
         
     for(int i=0; i<8; i++)
@@ -233,7 +238,7 @@ short unsignedByteToShort(byte b)
 
 long getNTPTimeMS(byte[] array, destinationTimestamp) 
 {
-    logger("Executing 'getNTPTimeMS()'", "debug")
+    if (state.loggingLevel <= 4) logger("Executing 'getNTPTimeMS()'", "debug")
     // See the packet format diagram in RFC 2030 for details 
     
     /* 
@@ -271,11 +276,11 @@ long getNTPTimeMS(byte[] array, destinationTimestamp)
 
 def encodeTimestamp(array,pointer, timestamp)
 {
-    logger("Executing 'encodeTimestamp()'", "debug")
+    if (state.loggingLevel <= 4) logger("Executing 'encodeTimestamp()'", "debug")
     // Converts a double into a 64-bit fixed point
     for(i=0; i<8; i++) {
         // 2^24, 2^16, 2^8, .. 2^-32
-        double base = Math.pow(2, (3-i)*8);
+        def base = Math.pow(2, (3-i)*8) as BigDecimal
                
         // Capture byte value
         array[pointer+i] = (byte) (timestamp / base);
